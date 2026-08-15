@@ -4,7 +4,7 @@
 
 （待补充）
 
-## 2. 环境配置
+## 2. 环境配置与编译构建
 
 ### 通用要求
 
@@ -34,6 +34,8 @@
    cmake --build build
    ```
 
+如需 Debug 构建：`cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug`
+
 ### 2.2 Linux
 
 以 Debian/Ubuntu 系为例：
@@ -50,6 +52,8 @@
    cmake -S . -B build -G Ninja
    cmake --build build
    ```
+
+如需 Debug 构建：`cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug`
 
 ### 2.3 Windows
 
@@ -79,6 +83,11 @@
    cmake -S . -B build
    cmake --build build --config Debug
    ```
+
+### 2.4 构建产物
+
+- macOS/Linux：`build/doe_engine`
+- Windows：`build/doe_engine.exe`
 
 ## 3. 快速开始
 
