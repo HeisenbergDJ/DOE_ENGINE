@@ -1,0 +1,52 @@
+{
+  "type": "command",
+  "executable": "{experiment_dir}/resources/add_dif.exe",
+  "working_directory": "{design_point_dir}",
+  "arguments": [
+    "{design_point_dir}/my.in"
+  ],
+  "timeout_seconds": 0,
+  "success_exit_codes": [
+    0
+  ],
+  "inputs": [
+    {
+      "mode": "tagged_copy",
+      "source": "{experiment_dir}/resources/my.in.template",
+      "destination": "{design_point_dir}/my.in",
+      "tagger": {
+        "type": "delimited_text",
+        "index_base": 0,
+        "delimiters": [
+          " ",
+          "\t",
+          "="
+        ],
+        "value_format": {
+          "notation": "scientific",
+          "precision": 12
+        },
+        "tags": [
+          {
+            "row": 0,
+            "column": 1,
+            "variable": "x1"
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "variable": "x2"
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "port": "result_file",
+      "type": "file",
+      "path": "{design_point_dir}/my.out",
+      "required": true
+    }
+  ]
+}

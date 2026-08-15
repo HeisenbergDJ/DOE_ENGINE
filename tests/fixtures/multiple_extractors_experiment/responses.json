@@ -1,0 +1,18 @@
+{
+  "responses": [
+    {
+      "id": "y1",
+      "name": "Sum response",
+      "description": "The sum of x1 and x2 produced by add_dif.",
+      "unit": "1",
+      "value_type": "real"
+    },
+    {
+      "id": "y2",
+      "name": "Difference response",
+      "description": "The difference x1 minus x2 produced by add_dif.",
+      "unit": "1",
+      "value_type": "real"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "format": "doe_experiment",
+  "format_version": 1,
+  "id": "placeholder_text_full_factorial",
+  "name": "Placeholder-text two-variable full-factorial experiment",
+  "description": "A fixture for validating placeholder-text tagging in a complete two-factor workflow.",
+  "variables": {
+    "file": "variables.json"
+  },
+  "responses": {
+    "file": "responses.json"
+  },
+  "sampling": {
+    "file": "sampling.json"
+  },
+  "workflow": {
+    "file": "workflow.json"
+  },
+  "extractors": {
+    "file": "extractors.json"
+  }
+}

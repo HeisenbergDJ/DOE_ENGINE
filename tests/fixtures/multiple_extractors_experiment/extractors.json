@@ -1,0 +1,38 @@
+{
+  "extractors": [
+    {
+      "id": "extract_y1",
+      "configuration": {
+        "file": "extractors/y1.json"
+      },
+      "inputs": {
+        "source_file": {
+          "application": "run_model",
+          "output": "result_file"
+        }
+      },
+      "outputs": {
+        "value": {
+          "response": "y1"
+        }
+      }
+    },
+    {
+      "id": "extract_y2",
+      "configuration": {
+        "file": "extractors/y2.json"
+      },
+      "inputs": {
+        "source_file": {
+          "application": "run_model",
+          "output": "result_file"
+        }
+      },
+      "outputs": {
+        "value": {
+          "response": "y2"
+        }
+      }
+    }
+  ]
+}

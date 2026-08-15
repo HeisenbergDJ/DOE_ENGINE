@@ -1,0 +1,11 @@
+{
+  "responses": [
+    {
+      "id": "q",
+      "name": "Q scalar",
+      "description": "Scalar Q metric computed from the VMEC wout NetCDF file.",
+      "unit": "1",
+      "value_type": "real"
+    }
+  ]
+}

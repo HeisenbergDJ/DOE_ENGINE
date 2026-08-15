@@ -1,0 +1,11 @@
+{
+  "applications": [
+    {
+      "id": "run_model",
+      "configuration": {
+        "file": "applications/add_dif.json"
+      }
+    }
+  ],
+  "connections": []
+}

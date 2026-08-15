@@ -1,0 +1,13 @@
+{
+  "type": "full_factorial",
+  "factors": [
+    {
+      "variable": "x1",
+      "levels": 2
+    },
+    {
+      "variable": "x2",
+      "levels": 2
+    }
+  ]
+}

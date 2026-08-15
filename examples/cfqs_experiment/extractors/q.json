@@ -1,0 +1,41 @@
+{
+  "type": "python_script",
+  "interpreter": "python3",
+  "script": "{project}/resources/extract_q.py",
+  "working_directory": "{experiment}",
+  "inputs": [
+    {
+      "port": "wout",
+      "type": "file"
+    }
+  ],
+  "arguments": [
+    "--wout",
+    "{input:wout}",
+    "--output",
+    "{experiment}/q_response.json",
+    "--nthetastar",
+    "32",
+    "--nzeta",
+    "32",
+    "--delta-ntheta",
+    "512",
+    "--delta-nzeta",
+    "512"
+  ],
+  "timeout_seconds": 0,
+  "success_exit_codes": [
+    0
+  ],
+  "result": {
+    "file": "{experiment}/q_response.json",
+    "format": "json",
+    "values": [
+      {
+        "key": "q",
+        "output": "q",
+        "value_type": "real"
+      }
+    ]
+  }
+}

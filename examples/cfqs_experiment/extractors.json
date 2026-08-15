@@ -1,0 +1,21 @@
+{
+  "extractors": [
+    {
+      "id": "extract_q",
+      "configuration": {
+        "file": "extractors/q.json"
+      },
+      "inputs": {
+        "wout": {
+          "application": "run_vmecpp",
+          "output": "wout_file"
+        }
+      },
+      "outputs": {
+        "q": {
+          "response": "q"
+        }
+      }
+    }
+  ]
+}

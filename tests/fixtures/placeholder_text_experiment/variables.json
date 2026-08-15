@@ -1,0 +1,28 @@
+{
+  "variables": [
+    {
+      "id": "x1",
+      "name": "First design variable",
+      "description": "First dimensionless input of the mock model.",
+      "unit": "1",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -1.0,
+        "upper_bound": 1.0
+      }
+    },
+    {
+      "id": "x2",
+      "name": "Second design variable",
+      "description": "Second dimensionless input of the mock model.",
+      "unit": "1",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": 0.0,
+        "upper_bound": 2.0
+      }
+    }
+  ]
+}

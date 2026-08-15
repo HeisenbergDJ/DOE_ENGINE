@@ -1,0 +1,11 @@
+{
+  "applications": [
+    {
+      "id": "run_vmecpp",
+      "configuration": {
+        "file": "applications/vmecpp.json"
+      }
+    }
+  ],
+  "connections": []
+}

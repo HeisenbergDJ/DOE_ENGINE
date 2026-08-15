@@ -1,0 +1,41 @@
+{
+  "type": "full_factorial",
+  "factors": [
+    {
+      "variable": "extcur_1",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_2",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_3",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_4",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_5",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_6",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_7",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_8",
+      "levels": 2
+    },
+    {
+      "variable": "extcur_9",
+      "levels": 2
+    }
+  ]
+}

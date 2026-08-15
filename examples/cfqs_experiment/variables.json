@@ -1,0 +1,112 @@
+{
+  "variables": [
+    {
+      "id": "extcur_1",
+      "name": "EXTCUR(1)",
+      "description": "VMEC external-coil current 1.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -312500.0,
+        "upper_bound": -156250.0
+      }
+    },
+    {
+      "id": "extcur_2",
+      "name": "EXTCUR(2)",
+      "description": "VMEC external-coil current 2.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -312500.0,
+        "upper_bound": -156250.0
+      }
+    },
+    {
+      "id": "extcur_3",
+      "name": "EXTCUR(3)",
+      "description": "VMEC external-coil current 3.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -312500.0,
+        "upper_bound": -156250.0
+      }
+    },
+    {
+      "id": "extcur_4",
+      "name": "EXTCUR(4)",
+      "description": "VMEC external-coil current 4.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -312500.0,
+        "upper_bound": -156250.0
+      }
+    },
+    {
+      "id": "extcur_5",
+      "name": "EXTCUR(5)",
+      "description": "VMEC external-coil current 5.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -31250.0,
+        "upper_bound": 31250.0
+      }
+    },
+    {
+      "id": "extcur_6",
+      "name": "EXTCUR(6)",
+      "description": "VMEC external-coil current 6.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -31250.0,
+        "upper_bound": 31250.0
+      }
+    },
+    {
+      "id": "extcur_7",
+      "name": "EXTCUR(7)",
+      "description": "VMEC external-coil current 7.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -31250.0,
+        "upper_bound": 31250.0
+      }
+    },
+    {
+      "id": "extcur_8",
+      "name": "EXTCUR(8)",
+      "description": "VMEC external-coil current 8.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -50000.0,
+        "upper_bound": 50000.0
+      }
+    },
+    {
+      "id": "extcur_9",
+      "name": "EXTCUR(9)",
+      "description": "VMEC external-coil current 9.",
+      "unit": "A",
+      "value_type": "real",
+      "domain": {
+        "type": "continuous",
+        "lower_bound": -50000.0,
+        "upper_bound": 50000.0
+      }
+    }
+  ]
+}

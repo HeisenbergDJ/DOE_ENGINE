@@ -1,0 +1,22 @@
+{
+  "format": "doe_experiment",
+  "format_version": 1,
+  "id": "cfqs_extcur_q_full_factorial",
+  "name": "CFQS coil-current scan for Q",
+  "description": "Evaluate the relationship between nine VMEC external-coil currents and the Q response.",
+  "variables": {
+    "file": "variables.json"
+  },
+  "responses": {
+    "file": "responses.json"
+  },
+  "sampling": {
+    "file": "sampling.json"
+  },
+  "workflow": {
+    "file": "workflow.json"
+  },
+  "extractors": {
+    "file": "extractors.json"
+  }
+}

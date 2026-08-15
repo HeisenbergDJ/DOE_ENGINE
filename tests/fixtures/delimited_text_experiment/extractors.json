@@ -1,0 +1,21 @@
+{
+  "extractors": [
+    {
+      "id": "extract_objective",
+      "configuration": {
+        "file": "extractors/objective.json"
+      },
+      "inputs": {
+        "source_file": {
+          "application": "run_model",
+          "output": "result_file"
+        }
+      },
+      "outputs": {
+        "value": {
+          "response": "objective"
+        }
+      }
+    }
+  ]
+}

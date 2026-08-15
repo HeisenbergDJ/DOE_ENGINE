@@ -1,0 +1,11 @@
+{
+  "responses": [
+    {
+      "id": "objective",
+      "name": "Objective value",
+      "description": "Scalar response produced by the mock model.",
+      "unit": "1",
+      "value_type": "real"
+    }
+  ]
+}

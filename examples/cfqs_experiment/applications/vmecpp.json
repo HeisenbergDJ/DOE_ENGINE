@@ -1,0 +1,92 @@
+{
+  "type": "command",
+  "executable": "vmecpp",
+  "working_directory": "{experiment}",
+  "arguments": [
+    "{experiment}/input.2b40Ncoil16"
+  ],
+  "timeout_seconds": 0,
+  "success_exit_codes": [
+    0
+  ],
+  "inputs": [
+    {
+      "mode": "tagged_copy",
+      "source": "{project}/resources/input.2b40Ncoil16.template",
+      "destination": "{experiment}/input.2b40Ncoil16",
+      "tagger": {
+        "type": "delimited_text",
+        "index_base": 0,
+        "delimiters": [
+          " ",
+          "\t",
+          "="
+        ],
+        "value_format": {
+          "notation": "scientific",
+          "precision": 12
+        },
+        "tags": [
+          {
+            "row": 21,
+            "column": 1,
+            "variable": "extcur_1"
+          },
+          {
+            "row": 21,
+            "column": 2,
+            "variable": "extcur_2"
+          },
+          {
+            "row": 21,
+            "column": 3,
+            "variable": "extcur_3"
+          },
+          {
+            "row": 21,
+            "column": 4,
+            "variable": "extcur_4"
+          },
+          {
+            "row": 22,
+            "column": 0,
+            "variable": "extcur_5"
+          },
+          {
+            "row": 22,
+            "column": 1,
+            "variable": "extcur_6"
+          },
+          {
+            "row": 22,
+            "column": 2,
+            "variable": "extcur_7"
+          },
+          {
+            "row": 22,
+            "column": 3,
+            "variable": "extcur_8"
+          },
+          {
+            "row": 22,
+            "column": 4,
+            "variable": "extcur_9"
+          }
+        ]
+      }
+    },
+    {
+      "mode": "copy",
+      "source": "{project}/resources/mgrid_2b40Ncoil16.nc",
+      "destination": "{experiment}/mgrid_2b40Ncoil16_B01opt_free.nc"
+    }
+  ],
+  "outputs": [
+    {
+      "port": "wout_file",
+      "type": "file",
+      "path": "{experiment}/wout_2b40Ncoil16.nc",
+      "required": true
+    }
+  ]
+}

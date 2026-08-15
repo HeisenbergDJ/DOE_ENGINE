@@ -1,0 +1,22 @@
+{
+  "format": "doe_experiment",
+  "format_version": 1,
+  "id": "multiple_extractors_full_factorial",
+  "name": "Two-response full-factorial experiment",
+  "description": "A fixture for validating two Extractors consuming the same Application output.",
+  "variables": {
+    "file": "variables.json"
+  },
+  "responses": {
+    "file": "responses.json"
+  },
+  "sampling": {
+    "file": "sampling.json"
+  },
+  "workflow": {
+    "file": "workflow.json"
+  },
+  "extractors": {
+    "file": "extractors.json"
+  }
+}

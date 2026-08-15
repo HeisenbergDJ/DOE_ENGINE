@@ -1,0 +1,4 @@
+interface:
+  display_name: "DOE Engine C++ Style"
+  short_description: "Apply DOE Engine C++ and CMake conventions"
+  default_prompt: "Use $doe-engine-cpp-style to implement the next DOE Engine C++ change consistently."
