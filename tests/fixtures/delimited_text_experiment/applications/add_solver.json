@@ -1,6 +1,6 @@
 {
   "type": "command",
-  "executable": "{experiment_dir}/resources/add.exe",
+  "executable": "{experiment_dir}/resources/add_solver",
   "working_directory": "{design_point_dir}",
   "arguments": [
     "{design_point_dir}/my.in"

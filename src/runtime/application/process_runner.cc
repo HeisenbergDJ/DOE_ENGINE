@@ -115,7 +115,11 @@ ProcessResult Process::Run() const
     ProcessResult result;
 
 #ifdef _WIN32
-    const std::wstring command_line = BuildCommandLine(executable_.wstring(), arguments_);
+    std::filesystem::path executable = executable_;
+    if (executable.extension().empty()) {
+        executable.replace_extension(".exe");
+    }
+    const std::wstring command_line = BuildCommandLine(executable.wstring(), arguments_);
     const std::wstring working_directory = working_directory_.wstring();
     std::vector<wchar_t> command_buffer(command_line.begin(), command_line.end());
     command_buffer.push_back(L'\0');

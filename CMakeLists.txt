@@ -98,8 +98,27 @@ add_custom_target(copy_test_fixtures ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/multiple_extractors_experiment"
             "${DOE_TEST_FIXTURE_OUTPUT_DIR}/multiple_extractors_experiment"
-    COMMENT "Copying DOE test fixtures"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:doe_test_add_solver>
+            "${DOE_TEST_FIXTURE_OUTPUT_DIR}/delimited_text_experiment/resources/"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:doe_test_add_solver>
+            "${DOE_TEST_FIXTURE_OUTPUT_DIR}/placeholder_text_experiment/resources/"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:doe_test_add_dif>
+            "${DOE_TEST_FIXTURE_OUTPUT_DIR}/multiple_extractors_experiment/resources/"
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/scripts/test.bat"
+            "${CMAKE_CURRENT_BINARY_DIR}/test.bat"
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/scripts/test.sh"
+            "${CMAKE_CURRENT_BINARY_DIR}/test.sh"
+    COMMENT "Copying DOE test fixtures and built solvers"
     VERBATIM
 )
 
 add_dependencies(doe_engine copy_test_fixtures)
+
+# Test solver executables are built per platform and placed into the fixture
+# resource directories by copy_test_fixtures on every build, so the runnable
+# fixtures work on every platform. copy_test_fixtures depends on them so they
+# are built first.
+add_subdirectory(tests/fixtures/solvers)
+add_dependencies(copy_test_fixtures doe_test_add_solver doe_test_add_dif)

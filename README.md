@@ -96,15 +96,15 @@
 ### 3.1 macOS 与 Linux
 
 ```sh
-./build/doe_engine tests/fixtures/delimited_text_experiment/experiment.json
+./build/doe_engine build/tests/fixtures/delimited_text_experiment/experiment.json
 ```
 
 ### 3.2 Windows
 
 ```sh
-build\doe_engine.exe tests\fixtures\delimited_text_experiment\experiment.json
+build\doe_engine.exe build\tests\fixtures\delimited_text_experiment\experiment.json
 ```
 
-仓库自带三个可运行的实验 fixture：`delimited_text_experiment`、`multiple_extractors_experiment`、`placeholder_text_experiment`，把上面的路径换成对应 `experiment.json` 即可。
+仓库自带三个可运行的实验 fixture：`delimited_text_experiment`、`multiple_extractors_experiment`、`placeholder_text_experiment`（位于 `build/tests/fixtures/`，其中的测试 CLI 程序由构建按当前平台自动编译生成），把上面的路径换成对应 `experiment.json` 即可。
 
 引擎会把运行记录（`runs/`）写入 `experiment.json` 所在目录，并把每个设计点的响应值打印到标准输出。
