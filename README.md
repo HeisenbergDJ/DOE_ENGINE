@@ -91,4 +91,20 @@
 
 ## 3. 快速开始
 
-（待补充）
+构建完成后（见第 2 章），运行引擎并传入一个实验配置文件的路径即可。
+
+### 3.1 macOS 与 Linux
+
+```sh
+./build/doe_engine tests/fixtures/delimited_text_experiment/experiment.json
+```
+
+### 3.2 Windows
+
+```sh
+build\doe_engine.exe tests\fixtures\delimited_text_experiment\experiment.json
+```
+
+仓库自带三个可运行的实验 fixture：`delimited_text_experiment`、`multiple_extractors_experiment`、`placeholder_text_experiment`，把上面的路径换成对应 `experiment.json` 即可。
+
+引擎会把运行记录（`runs/`）写入 `experiment.json` 所在目录，并把每个设计点的响应值打印到标准输出。
