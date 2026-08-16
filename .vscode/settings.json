@@ -1,0 +1,5 @@
+{
+    "cmake.configureSettings": {
+        "DOE_ENABLE_MPI": true
+    }
+}
