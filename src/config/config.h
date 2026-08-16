@@ -34,6 +34,12 @@ namespace doe::config {
 // this aggregate only after semantic validation succeeds.
 struct LoadedExperimentConfig {
     std::filesystem::path experiment_file;
+
+    // SHA-256 of experiment.json and every referenced configuration file, in a
+    // canonical order. A fingerprint of the exact configuration this run was
+    // loaded from; used for reproducibility and to detect input drift.
+    std::string config_hash;
+
     ExperimentConfig experiment;
     VariablesConfig variables;
     ResponsesConfig responses;

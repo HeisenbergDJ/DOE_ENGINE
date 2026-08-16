@@ -13,14 +13,19 @@
 #include "config.h"
 #include "design_point.h"
 #include "extractor.h"
+#include "logger.h"
 #include "persistence.h"
 #include "response.h"
 #include "sampling.h"
 #include "workflow.h"
 
+#include "point_scheduler.h"
+
 #include <cstddef>
+#include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -47,18 +52,26 @@ public:
     Experiment(doe::config::LoadedExperimentConfig config,
                doe::persistence::Persistence* persistence);
 
-    ExperimentResult Run();
+    // Runs the experiment. When resume_run_id is given, the engine reuses that
+    // run id (instead of generating a new one) and skips design points that
+    // already have a terminal outcome recorded in the Persistence.
+    ExperimentResult Run(const std::optional<std::string>& resume_run_id = std::nullopt);
 
     const std::vector<DesignPoint>& points() const noexcept;
 
 private:
+    bool RunPoint(std::size_t index, const std::string& run_id,
+                  const std::filesystem::path& run_dir, const doe::log::Logger& logger);
+
     std::string CreateRunId() const;
 
+    std::string config_hash_;
     std::map<std::string, Response> responses_;
 
     std::unique_ptr<Sampler> sampler_;
     std::unique_ptr<WorkflowRunner> workflow_runner_;
     std::unique_ptr<ExtractorRunner> extractor_runner_;
+    std::unique_ptr<PointScheduler> scheduler_;
     doe::persistence::Persistence* persistence_;
 
     std::vector<DesignPoint> points_;

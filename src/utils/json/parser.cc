@@ -12,10 +12,13 @@
 #include "json.hpp"
 
 #include "error.h"
+#include "sha256.h"
 
+#include <algorithm>
 #include <fstream>
 #include <limits>
 #include <map>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -907,6 +910,39 @@ ExtractorDefinitionConfig Parser::ParseExtractorDefinition(const std::filesystem
     throw ConfigError(source, type_location, "unsupported extractor type \"" + type + "\"");
 }
 
+std::string ComputeConfigHash(const LoadedExperimentConfig& loaded)
+{
+    std::vector<std::filesystem::path> files;
+    files.push_back(loaded.experiment_file);
+    files.push_back(loaded.experiment.variables.file);
+    files.push_back(loaded.experiment.responses.file);
+    files.push_back(loaded.experiment.sampling.file);
+    files.push_back(loaded.experiment.workflow.file);
+    files.push_back(loaded.experiment.extractors.file);
+    for (const auto& instance : loaded.workflow.applications) {
+        files.push_back(instance.configuration.file);
+    }
+    for (const auto& instance : loaded.extractors.extractors) {
+        files.push_back(instance.configuration.file);
+    }
+    std::sort(files.begin(), files.end());
+    files.erase(std::unique(files.begin(), files.end()), files.end());
+
+    std::string data;
+    for (const std::filesystem::path& file : files) {
+        std::ifstream stream(file, std::ios::binary);
+        if (!stream) {
+            continue;
+        }
+        std::ostringstream buffer;
+        buffer << stream.rdbuf();
+        data += file.string();
+        data.push_back('\0');
+        data += buffer.str();
+    }
+    return Sha256Hex(data);
+}
+
 LoadedExperimentConfig Parser::LoadExperiment(const std::filesystem::path& experiment_file)
 {
     RequireAbsolutePath(experiment_file);
@@ -936,6 +972,7 @@ LoadedExperimentConfig Parser::LoadExperiment(const std::filesystem::path& exper
                               "duplicate Extractor instance id \"" + instance.id + "\"");
         }
     }
+    loaded.config_hash = ComputeConfigHash(loaded);
     return loaded;
 }
 

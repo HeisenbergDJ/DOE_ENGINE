@@ -11,10 +11,12 @@
 #include "experiment.h"
 #include "parser.h"
 #include "scalar_value.h"
+#include "sqlite_persistence.h"
 
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -39,19 +41,30 @@ std::string ToString(const doe::runtime::ScalarValue& value)
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2) {
-        std::cerr << "usage: doe_engine <experiment.json>" << std::endl;
+    if (argc != 2 && argc != 4) {
+        std::cerr << "usage: doe_engine <experiment.json> [--resume <run_id>]" << std::endl;
         return 2;
     }
 
     try {
         const std::filesystem::path experiment_file = std::filesystem::absolute(argv[1]);
+        std::optional<std::string> resume_run_id;
+        if (argc == 4) {
+            if (std::string(argv[2]) != "--resume") {
+                std::cerr << "unknown option: " << argv[2] << std::endl;
+                return 2;
+            }
+            resume_run_id = argv[3];
+        }
+
         const doe::config::LoadedExperimentConfig config =
             doe::utils::Parser::LoadExperiment(experiment_file);
 
-        doe::runtime::Experiment experiment(config, nullptr);
+        const std::filesystem::path db_path = experiment_file.parent_path() / "doe_engine.db";
+        doe::persistence::SqlitePersistence persistence(db_path);
+        doe::runtime::Experiment experiment(config, &persistence);
 
-        const doe::runtime::ExperimentResult result = experiment.Run();
+        const doe::runtime::ExperimentResult result = experiment.Run(resume_run_id);
 
         std::cout << "run: " << result.run_id << std::endl;
         std::cout << "design points: " << result.point_count << std::endl;

@@ -21,13 +21,17 @@ namespace doe::runtime {
 // Full-factorial design: the cartesian product of every factor's levels, with
 // the first factor varying slowest and the last factor varying fastest. The
 // constructor reads the Config once and pre-compiles each factor into a runtime
-// Variable template (variables_) and its level values (levels_); Generate()
-// only enumerates the cartesian product.
+// Variable template (variables_) and its level values (levels_). Design points
+// are addressable by index: Size() is the product of the level counts and
+// At(index) decodes the index into the cartesian combination, so points can be
+// enumerated lazily without materializing the whole matrix.
 class FullFactorialSampler : public Sampler {
 public:
     FullFactorialSampler(const doe::config::VariablesConfig& variables,
                          const doe::config::SamplingConfig& sampling);
 
+    std::size_t Size() const override;
+    DesignPoint At(std::size_t index) const override;
     std::vector<DesignPoint> Generate() const override;
 
 private:

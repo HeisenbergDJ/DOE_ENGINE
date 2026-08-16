@@ -13,6 +13,7 @@
 #include "scalar_value.h"
 
 #include <filesystem>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -94,40 +95,47 @@ FullFactorialSampler::FullFactorialSampler(const doe::config::VariablesConfig& v
     }
 }
 
-std::vector<DesignPoint> FullFactorialSampler::Generate() const
+std::size_t FullFactorialSampler::Size() const
 {
     if (levels_.empty()) {
-        std::vector<DesignPoint> single;
-        single.emplace_back(0);
-        return single;
+        return 1;
     }
+    std::size_t total = 1;
+    for (const std::vector<ScalarValue>& levels : levels_) {
+        if (total > std::numeric_limits<std::size_t>::max() / levels.size()) {
+            throw RuntimeError("sampling", "", std::filesystem::path(),
+                               "design point count overflows");
+        }
+        total *= levels.size();
+    }
+    return total;
+}
 
+DesignPoint FullFactorialSampler::At(std::size_t index) const
+{
+    if (index >= Size()) {
+        throw RuntimeError("sampling", "", std::filesystem::path(),
+                           "design point index out of range");
+    }
+    DesignPoint point(index);
+    std::size_t remaining = index;
+    for (std::size_t factor = levels_.size(); factor > 0; --factor) {
+        const std::size_t current = factor - 1;
+        const std::size_t level = remaining % levels_[current].size();
+        remaining /= levels_[current].size();
+        Variable variable = variables_[current];
+        variable.set_value(levels_[current][level]);
+        point.set_variable(std::move(variable));
+    }
+    return point;
+}
+
+std::vector<DesignPoint> FullFactorialSampler::Generate() const
+{
     std::vector<DesignPoint> points;
-    std::vector<std::size_t> counters(levels_.size(), 0);
-    bool done = false;
-    std::size_t index = 0;
-    while (!done) {
-        DesignPoint point(index);
-        for (std::size_t factor = 0; factor < levels_.size(); ++factor) {
-            Variable variable = variables_[factor];
-            variable.set_value(levels_[factor][counters[factor]]);
-            point.set_variable(std::move(variable));
-        }
-        points.push_back(std::move(point));
-        ++index;
-
-        std::size_t factor = levels_.size();
-        while (factor > 0) {
-            --factor;
-            if (counters[factor] + 1 < levels_[factor].size()) {
-                ++counters[factor];
-                break;
-            }
-            counters[factor] = 0;
-            if (factor == 0) {
-                done = true;
-            }
-        }
+    points.reserve(Size());
+    for (std::size_t index = 0; index < Size(); ++index) {
+        points.push_back(At(index));
     }
     return points;
 }

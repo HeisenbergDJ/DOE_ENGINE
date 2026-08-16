@@ -12,6 +12,7 @@
 - CMake >= 3.20
 - 构建工具（Ninja 或 make）
 - 仓库已内置 `third_party/nlohmann/json.hpp`，JSON 依赖无需单独安装
+- SQLite 走 vendor 单体版（`third_party/sqlite/`，见其中的 README）：从 <https://www.sqlite.org/download.html> 下载 amalgamation，把 `sqlite3.c`/`sqlite3.h` 放入该目录
 
 ### 2.1 macOS
 
@@ -84,7 +85,32 @@
    cmake --build build --config Debug
    ```
 
-### 2.4 构建产物
+### 2.4 MPI 并行（可选）
+
+默认关闭（串行模式，无需 MPI）。开启后支持本机多核或集群多进程并行计算。
+
+开启方式（需先安装 MPI 实现，如 MS-MPI / OpenMPI / MPICH）：
+
+```sh
+cmake -S . -B build -DDOE_ENABLE_MPI=ON
+cmake --build build
+```
+
+运行方式：
+
+```sh
+mpiexec -np 4 build/doe_engine build/tests/fixtures/delimited_text_experiment/experiment.json
+```
+
+注意事项：
+
+- 未用 `mpiexec`/`mpirun` 直接运行 MPI 构建产物，行为未定义，请始终通过启动器运行；
+- 设计点按连续块分片到各 rank，每个 rank 只枚举并运行自己的片段（全因子按 index 流式生成，不在内存中物化整张设计矩阵）；
+- 每个 rank 各自创建并写入自己的 `DESIGN_POINT_<index>` 目录；
+- `run_id` 由 rank 0 生成并广播，运行摘要（成功数）在全部 rank 汇总；
+- 串行模式行为与关闭开关时一致，可作调试基线。
+
+### 2.5 构建产物
 
 - macOS/Linux：`build/doe_engine`
 - Windows：`build/doe_engine.exe`
@@ -107,4 +133,8 @@ build\doe_engine.exe build\tests\fixtures\delimited_text_experiment\experiment.j
 
 仓库自带三个可运行的实验 fixture：`delimited_text_experiment`、`multiple_extractors_experiment`、`placeholder_text_experiment`（位于 `build/tests/fixtures/`，其中的测试 CLI 程序由构建按当前平台自动编译生成），把上面的路径换成对应 `experiment.json` 即可。
 
-引擎会把运行记录（`runs/`）写入 `experiment.json` 所在目录，并把每个设计点的响应值打印到标准输出。
+引擎会把运行记录（`runs/`）写入 `experiment.json` 所在目录，并把每个设计点持久化到该目录下的 SQLite 数据库 `doe_engine.db`（`runs`/`design_points`/`application_runs` 三张表，含每次运行的 `config_hash` 指纹），同时把每个设计点响应值打印到标准输出。
+
+每次运行还会在 `{run_dir}`（即 `runs/<run_id>/`）下生成 `engine.log`，逐行带时间戳、rank 号与级别（INFO/WARN/ERROR），包含每个设计点的进度（`design point i/N: ok|failed`）、失败原因、以及结束时的总耗时。MPI 多进程会带各自的 rank 前缀。超算上可用 `tail -f runs/<run_id>/engine.log` 实时查看进度，`grep -i error` 查看错误。
+
+断点续算：`doe_engine <experiment.json> --resume <run_id>` 会复用该 `run_id`，跳过数据库中已完成（SUCCESS/FAILED）的设计点，只补跑剩余的点；若当前配置与数据库中该 run 记录的 `config_hash` 不一致则拒绝续算。

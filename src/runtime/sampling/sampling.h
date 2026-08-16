@@ -14,6 +14,7 @@
 #include "sampling_config.h"
 #include "variables_config.h"
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -21,11 +22,21 @@ namespace doe::runtime {
 
 // Generates the DesignPoints of one DOE experiment. A Sampler reads no JSON and
 // creates no directories. It is constructed with the variables and the sampling
-// strategy it belongs to, so Generate() needs no further input.
+// strategy it belongs to, so the design points are addressable by index and can
+// be enumerated lazily without materializing the whole set.
 class Sampler {
 public:
     virtual ~Sampler() = default;
 
+    // Total number of design points.
+    virtual std::size_t Size() const = 0;
+
+    // The index-th design point. Deterministic per index; used to stream design
+    // points per rank without materializing the full set.
+    virtual DesignPoint At(std::size_t index) const = 0;
+
+    // Materializes every design point in order. Convenience for small designs;
+    // prefer Size()/At() for streaming.
     virtual std::vector<DesignPoint> Generate() const = 0;
 };
 

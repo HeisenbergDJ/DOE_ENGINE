@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(DOE_ENGINE LANGUAGES CXX)
+project(DOE_ENGINE LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(DOE_ENABLE_MPI "Enable MPI parallel execution" OFF)
+if(DOE_ENABLE_MPI)
+    find_package(MPI REQUIRED)
+endif()
 
 set(DOE_SOURCE_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -29,6 +34,8 @@ add_library(doe_config
     src/config/config.cc
     src/utils/json/parser.cc
     src/utils/log/error.cc
+    src/utils/log/logger.cc
+    src/utils/tools/sha256.cc
 )
 
 target_include_directories(doe_config
@@ -52,11 +59,21 @@ add_library(doe_runtime
     src/runtime/extractor/python_script_extractor.cc
     src/runtime/sampling/full_factorial_sampler.cc
     src/runtime/sampling/sampling.cc
+    src/runtime/scheduler/point_scheduler.cc
+    src/runtime/scheduler/serial_scheduler.cc
     src/utils/tools/delimited_text.cc
     src/utils/tools/path_template.cc
     src/utils/tools/run_context.cc
     src/runtime/workflow/workflow.cc
 )
+
+if(DOE_ENABLE_MPI)
+    target_sources(doe_runtime PRIVATE
+        src/runtime/scheduler/mpi_scheduler.cc
+    )
+    target_compile_definitions(doe_runtime PRIVATE DOE_ENABLE_MPI)
+    target_link_libraries(doe_runtime PUBLIC MPI::MPI_CXX)
+endif()
 
 target_include_directories(doe_runtime
     PUBLIC
@@ -64,6 +81,23 @@ target_include_directories(doe_runtime
 )
 
 target_link_libraries(doe_runtime PUBLIC doe_config)
+
+# Vendored SQLite amalgamation and the SQLite persistence implementation.
+add_library(doe_sqlite STATIC
+    third_party/sqlite/sqlite3.c
+)
+target_include_directories(doe_sqlite PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sqlite"
+)
+
+add_library(doe_persistence
+    src/persistence/sqlite_persistence.cc
+)
+target_include_directories(doe_persistence
+    PUBLIC
+        ${DOE_SOURCE_INCLUDE_DIRS}
+)
+target_link_libraries(doe_persistence PUBLIC doe_config doe_sqlite)
 
 add_executable(doe_engine
     src/main.cc
@@ -74,7 +108,7 @@ target_include_directories(doe_engine
         ${DOE_SOURCE_INCLUDE_DIRS}
 )
 
-target_link_libraries(doe_engine PRIVATE doe_config doe_runtime)
+target_link_libraries(doe_engine PRIVATE doe_config doe_runtime doe_persistence)
 
 set(DOE_TEST_FIXTURE_OUTPUT_DIR
     "${CMAKE_CURRENT_BINARY_DIR}/tests/fixtures"
