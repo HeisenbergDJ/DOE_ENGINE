@@ -89,7 +89,7 @@
 
 默认关闭（串行模式，无需 MPI）。开启后支持本机多核或集群多进程并行计算。通用编译开关为 `-DDOE_ENABLE_MPI=ON`，运行一律通过 `mpiexec`/`mpirun` 启动。
 
-#### 2.4.1 Linux
+#### 2.4.1 本地 Linux / macOS
 
 **环境检测**（确认装了哪种 MPI 实现）：
 
@@ -98,13 +98,14 @@ which mpicxx
 mpirun --version      # 输出含 "Open MPI" / "MPICH" 等实现名
 ```
 
-- OpenMPI：Ubuntu/Debian `sudo apt install openmpi-bin libopenmpi-dev`；RHEL/CentOS `sudo dnf install openmpi`（部分发行版需 `module load mpi/openmpi-x86_64` 后才能用）。
-- MPICH：`sudo apt install mpich`。
+- Linux OpenMPI：Ubuntu/Debian `sudo apt install openmpi-bin libopenmpi-dev`；RHEL/CentOS `sudo dnf install openmpi`。
+- Linux MPICH：`sudo apt install mpich`。
+- macOS（Homebrew）：`brew install openmpi`（或 `brew install mpich`）。
 
 **编译**（用该实现的 `mpicxx` 作为编译器，FindMPI 与链接都跟着它走）：
 
 ```sh
-export PATH=<你的mpi>/bin:$PATH          # 例如 /usr/lib64/openmpi/bin 或集群的 /public/software/mpi/openmpi/<版本>/bin
+export PATH=<你的mpi>/bin:$PATH          # 例如 /usr/lib64/openmpi/bin
 cmake -S . -B build -DDOE_ENABLE_MPI=ON -DCMAKE_CXX_COMPILER=$(which mpicxx)
 cmake --build build
 ```
@@ -117,28 +118,48 @@ cmake --build build
 mpiexec -np 4 ./build/doe_engine build/tests/fixtures/delimited_text_experiment/experiment.json
 ```
 
-#### 2.4.2 macOS
+#### 2.4.2 超算集群（Linux）
 
-**环境检测**：
+**环境检测**：集群通常通过模块系统或共享软件目录提供多个 MPI 实现，需先确认并选中一个：
 
 ```sh
-which mpicxx; mpirun --version
+module avail mpi        # 或 module avail openmpi / mpich，然后 module load openmpi
+ls /public/software/mpi 2>/dev/null    # 集群常见：hpcx / intelmpi / mpich / mvapich2 / openmpi
+which mpicxx; mpirun --version         # 确认当前命中的实现与版本
 ```
 
-未装则安装（Homebrew）：`brew install openmpi`（或 `brew install mpich`）。
+- 指定用哪个实现：`export PATH=/public/software/mpi/openmpi/<版本>/bin:$PATH`（或用 `module load`）。
+- 先确认 CMake 版本：`cmake --version`。集群自带 CMake 可能很旧（如 2.8.12），不满足本项目最低要求（3.16）；此时下载新版预编译二进制到家目录并前置 PATH（见前文第 2 章通用要求）。
 
-**编译**（同 Linux）：
+**编译**：
 
 ```sh
+export PATH=/public/software/mpi/openmpi/3.1.2/bin:$PATH      # 选中目标实现
 cmake -S . -B build -DDOE_ENABLE_MPI=ON -DCMAKE_CXX_COMPILER=$(which mpicxx)
 cmake --build build
 ```
 
+配置输出确认 `MPI CXX wrapper` 指向该实现；**运行时务必用同一个实现/同一个 PATH 下的 `mpiexec`**。
+
 **运行**：
 
-```sh
-mpiexec -np 4 ./build/doe_engine build/tests/fixtures/delimited_text_experiment/experiment.json
-```
+- 登录节点小规模验证：
+
+  ```sh
+  mpiexec -np 4 ./build/doe_engine build/tests/fixtures/delimited_text_experiment/experiment.json
+  ```
+
+- 正式作业通过调度器提交（以 SLURM 为例）：
+
+  ```sh
+  #!/bin/bash
+  #SBATCH -N 2
+  #SBATCH --ntasks-per-node=32
+  #SBATCH -o %x.%j.log          # 作业日志（stdout/stderr）
+  mpiexec -np 64 ./build/doe_engine /path/to/experiment.json
+  ```
+
+  `sbatch run.sh` 后，进度与错误可在作业日志 `-o` 指定的文件里看，或直接 `tail -f <实验目录>/runs/<run_id>/engine.log`（该文件带时间戳与 rank 号）。
 
 #### 2.4.3 Windows
 
