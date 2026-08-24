@@ -61,7 +61,16 @@ public:
 
 private:
     bool RunPoint(std::size_t index, const std::string& run_id,
-                  const std::filesystem::path& run_dir, const doe::log::Logger& logger);
+                  const std::filesystem::path& run_dir, const doe::log::Logger& logger,
+                  std::vector<std::string>* records);
+
+    // Replays one serialized design point record into the Persistence. Called
+    // on the root process only.
+    void PersistRecord(const std::string& record_json, const std::string& run_id);
+
+    // Persists a batch of records inside one Persistence transaction. Called
+    // on the root process only.
+    void PersistBatch(const std::vector<std::string>& records, const std::string& run_id);
 
     std::string CreateRunId() const;
 

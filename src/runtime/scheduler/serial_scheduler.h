@@ -26,6 +26,15 @@ public:
 
     RunSummary Run(std::size_t point_count,
                    const std::function<bool(std::size_t)>& run_point) const override;
+
+    ResumeInfo BroadcastResumeInfo(const ResumeInfo& local) const override;
+
+    void SendBatch(const std::vector<std::string>& records) const override;
+    void FinishSending() const override;
+    void DrainAvailable(
+        const std::function<void(const std::vector<std::string>&)>& persist) const override;
+    void DrainAll(
+        const std::function<void(const std::vector<std::string>&)>& persist) const override;
 };
 
 }  // namespace doe::runtime

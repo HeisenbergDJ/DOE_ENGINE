@@ -26,9 +26,9 @@ namespace doe::persistence {
 
 // Persists a DOE Engine run into a SQLite database. Tables (runs,
 // design_points, application_runs) are created on open. Design points are
-// written once when they complete (lazy insert), so concurrent MPI processes
-// each write their own points; WAL mode and a busy timeout keep concurrent
-// writers working.
+// written once when they complete (lazy insert). Only the MPI root process
+// opens this database; WAL mode and a busy timeout guard against any residual
+// lock contention (for example a serial build opening the same file twice).
 class SqlitePersistence : public Persistence {
 public:
     explicit SqlitePersistence(const std::filesystem::path& db_path);
@@ -42,12 +42,17 @@ public:
         const std::map<std::string, std::filesystem::path>& outputs) override;
     void RecordPointOutcome(
         const std::string& run_id, std::size_t point_index,
-        const doe::runtime::DesignPoint& point, bool success, const std::string& error_message,
+        const std::map<std::string, doe::runtime::ScalarValue>& variables, bool success,
+        const std::string& error_message,
         const std::map<std::string, doe::runtime::ScalarValue>& responses) override;
 
     std::vector<std::size_t> TerminalPoints(const std::string& run_id) const override;
 
     std::string ConfigHash(const std::string& run_id) const override;
+
+    void BeginBatch() override;
+    void EndBatch() override;
+    void AbortBatch() override;
 
 private:
     void Execute(const std::string& sql);

@@ -31,15 +31,6 @@ nlohmann::json ScalarToJson(const doe::runtime::ScalarValue& value)
                       value);
 }
 
-std::string VariablesToJson(const doe::runtime::DesignPoint& point)
-{
-    nlohmann::json object = nlohmann::json::object();
-    for (const auto& variable : point.variables()) {
-        object[variable.first] = ScalarToJson(variable.second.value());
-    }
-    return object.dump();
-}
-
 std::string ScalarMapToJson(const std::map<std::string, doe::runtime::ScalarValue>& values)
 {
     nlohmann::json object = nlohmann::json::object();
@@ -152,6 +143,21 @@ void SqlitePersistence::Execute(const std::string& sql)
     }
 }
 
+void SqlitePersistence::BeginBatch()
+{
+    Execute("BEGIN;");
+}
+
+void SqlitePersistence::EndBatch()
+{
+    Execute("COMMIT;");
+}
+
+void SqlitePersistence::AbortBatch()
+{
+    Execute("ROLLBACK;");
+}
+
 void SqlitePersistence::RecordExperimentStart(const std::string& run_id,
                                               const std::string& config_hash)
 {
@@ -194,7 +200,8 @@ void SqlitePersistence::RecordApplicationRun(
 
 void SqlitePersistence::RecordPointOutcome(
     const std::string& run_id, std::size_t point_index,
-    const doe::runtime::DesignPoint& point, bool success, const std::string& error_message,
+    const std::map<std::string, doe::runtime::ScalarValue>& variables, bool success,
+    const std::string& error_message,
     const std::map<std::string, doe::runtime::ScalarValue>& responses)
 {
     // INSERT OR REPLACE lets a resumed run rewrite the row of a point it
@@ -207,7 +214,7 @@ void SqlitePersistence::RecordPointOutcome(
     sqlite3_bind_text(statement.get(), 1, run_id.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int64(statement.get(), 2, static_cast<sqlite3_int64>(point_index));
     sqlite3_bind_text(statement.get(), 3, success ? "SUCCESS" : "FAILED", -1, SQLITE_TRANSIENT);
-    const std::string variables_json = VariablesToJson(point);
+    const std::string variables_json = ScalarMapToJson(variables);
     sqlite3_bind_text(statement.get(), 4, variables_json.c_str(), -1, SQLITE_TRANSIENT);
     const std::string responses_json = ScalarMapToJson(responses);
     sqlite3_bind_text(statement.get(), 5, responses_json.c_str(), -1, SQLITE_TRANSIENT);

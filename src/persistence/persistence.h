@@ -28,8 +28,11 @@ namespace doe::persistence {
 //
 // Design points are recorded lazily: a point row is written once when the point
 // completes, with its final status and observed responses (single write per
-// point), so very large designs do not require pre-populating the database and
-// each process can write the points it ran.
+// point), so very large designs do not require pre-populating the database.
+//
+// Under MPI only the root (rank 0) process holds a Persistence implementation;
+// every other rank hands its finished design points to the root through the
+// scheduler, so all database operations happen on rank 0 alone.
 class Persistence {
 public:
     virtual ~Persistence() = default;
@@ -44,7 +47,8 @@ public:
 
     virtual void RecordPointOutcome(
         const std::string& run_id, std::size_t point_index,
-        const doe::runtime::DesignPoint& point, bool success, const std::string& error_message,
+        const std::map<std::string, doe::runtime::ScalarValue>& variables, bool success,
+        const std::string& error_message,
         const std::map<std::string, doe::runtime::ScalarValue>& responses) = 0;
 
     // Returns the point indices that already have a terminal outcome (SUCCESS or
@@ -54,6 +58,15 @@ public:
     // Returns the recorded config_hash of a run, or an empty string when the
     // run is unknown.
     virtual std::string ConfigHash(const std::string& run_id) const = 0;
+
+    // Batch transaction boundaries. The Experiment coordinator persists many
+    // design point records between BeginBatch() and EndBatch() so the backend
+    // can commit them as one transaction instead of one per record; AbortBatch()
+    // rolls back a batch whose commit failed partway through. Defaults to no-ops
+    // for backends that manage their own transactions.
+    virtual void BeginBatch() {}
+    virtual void EndBatch() {}
+    virtual void AbortBatch() {}
 };
 
 }  // namespace doe::persistence

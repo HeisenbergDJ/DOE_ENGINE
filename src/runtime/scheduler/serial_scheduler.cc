@@ -10,10 +10,10 @@
 #include "serial_scheduler.h"
 
 #include <functional>
+#include <string>
+#include <vector>
 
-namespace doe::runtime {
-
-std::string SerialScheduler::BeginRun(const std::string& candidate_run_id) const
+namespace doe::runtime {std::string SerialScheduler::BeginRun(const std::string& candidate_run_id) const
 {
     return candidate_run_id;
 }
@@ -39,6 +39,32 @@ RunSummary SerialScheduler::Run(std::size_t point_count,
         }
     }
     return summary;
+}
+
+ResumeInfo SerialScheduler::BroadcastResumeInfo(const ResumeInfo& local) const
+{
+    return local;
+}
+
+void SerialScheduler::SendBatch(const std::vector<std::string>& records) const
+{
+    (void)records;
+}
+
+void SerialScheduler::FinishSending() const
+{
+}
+
+void SerialScheduler::DrainAvailable(
+    const std::function<void(const std::vector<std::string>&)>& persist) const
+{
+    (void)persist;
+}
+
+void SerialScheduler::DrainAll(
+    const std::function<void(const std::vector<std::string>&)>& persist) const
+{
+    (void)persist;
 }
 
 }  // namespace doe::runtime

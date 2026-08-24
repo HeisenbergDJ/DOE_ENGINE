@@ -10,6 +10,7 @@
 #include "config.h"
 #include "experiment.h"
 #include "parser.h"
+#include "point_scheduler.h"
 #include "scalar_value.h"
 #include "sqlite_persistence.h"
 
@@ -61,8 +62,13 @@ int main(int argc, char* argv[])
             doe::utils::Parser::LoadExperiment(experiment_file);
 
         const std::filesystem::path db_path = experiment_file.parent_path() / "doe_engine.db";
-        doe::persistence::SqlitePersistence persistence(db_path);
-        doe::runtime::Experiment experiment(config, &persistence);
+        // Only the root process may touch the database; every other rank gets no
+        // Persistence and hands its results to the root through the scheduler.
+        std::unique_ptr<doe::persistence::SqlitePersistence> persistence;
+        if (doe::runtime::IsCoordinatorProcess()) {
+            persistence = std::make_unique<doe::persistence::SqlitePersistence>(db_path);
+        }
+        doe::runtime::Experiment experiment(config, persistence.get());
 
         const doe::runtime::ExperimentResult result = experiment.Run(resume_run_id);
 
