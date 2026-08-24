@@ -27,6 +27,18 @@ enum class ApplicationInputMode { kCopy, kTaggedCopy };
 enum class ArtifactType { kFile };
 enum class ValueNotation { kScientific, kFixed, kGeneral };
 
+// Engine run-policy enums, serialized by engine_cfg.json.
+//
+// ArtifactStrategy decides the disposition of ALL files produced for a design
+// point (input templates, intermediates and outputs): none keeps only the
+// database; keep_required keeps the required outputs; keep_all keeps every
+// file; tar packs each tar_batch_size design point directories into one
+// archive and removes the originals.
+enum class ArtifactStrategy { kNone, kKeepRequired, kKeepAll, kTar };
+enum class WorkingDirectoryMode { kShared, kScratch };
+enum class LogLevel { kInfo, kWarn, kError };
+enum class SchedulerMode { kStatic, kDynamic };
+
 // A config-side scalar value used by discrete domain entries. It mirrors the
 // runtime ScalarValue; the two layers convert directly.
 using ConfigScalar = std::variant<int, double, std::string>;

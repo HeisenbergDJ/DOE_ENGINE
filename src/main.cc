@@ -38,6 +38,17 @@ std::string ToString(const doe::runtime::ScalarValue& value)
     }, value);
 }
 
+// Directory of the running executable, derived from argv[0]; falls back to the
+// current working directory when argv[0] carries no path.
+std::filesystem::path ExecutableDirectory(const char* argv0)
+{
+    std::filesystem::path directory = std::filesystem::path(argv0).parent_path();
+    if (directory.empty()) {
+        directory = std::filesystem::current_path();
+    }
+    return std::filesystem::absolute(directory);
+}
+
 }  // namespace
 
 int main(int argc, char* argv[])
@@ -48,6 +59,12 @@ int main(int argc, char* argv[])
     }
 
     try {
+        // Startup configuration: engine_cfg.json must exist next to the
+        // executable and be valid; otherwise the process exits with an error.
+        const std::filesystem::path engine_config_path =
+            ExecutableDirectory(argv[0]) / "engine_cfg.json";
+        doe::utils::Parser::ParseEngineConfig(engine_config_path);
+
         const std::filesystem::path experiment_file = std::filesystem::absolute(argv[1]);
         std::optional<std::string> resume_run_id;
         if (argc == 4) {

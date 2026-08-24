@@ -144,6 +144,9 @@ add_custom_target(copy_test_fixtures ALL
     COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_CURRENT_SOURCE_DIR}/scripts/test.sh"
             "${CMAKE_CURRENT_BINARY_DIR}/test.sh"
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources/engine_cfg.json"
+            "${CMAKE_CURRENT_BINARY_DIR}/engine_cfg.json"
     COMMENT "Copying DOE test fixtures and built solvers"
     VERBATIM
 )

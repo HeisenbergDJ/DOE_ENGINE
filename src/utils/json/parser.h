@@ -7,8 +7,8 @@
  * Created: 2026-08-15                                              *
  * Copyrights Reserved                                              *
  ********************************************************************/
-#ifndef DOE_ENGINE_UTILS_IO_PARSER_H_
-#define DOE_ENGINE_UTILS_IO_PARSER_H_
+#ifndef DOE_ENGINE_UTILS_JSON_PARSER_H_
+#define DOE_ENGINE_UTILS_JSON_PARSER_H_
 
 #include "config.h"
 
@@ -23,6 +23,7 @@ namespace doe::utils {
 // offending JSON field location.
 class Parser {
 public:
+    static doe::config::EngineConfig ParseEngineConfig(const std::filesystem::path& file);
     static doe::config::ExperimentConfig ParseExperiment(const std::filesystem::path& file);
     static doe::config::VariablesConfig ParseVariables(const std::filesystem::path& file);
     static doe::config::ResponsesConfig ParseResponses(const std::filesystem::path& file);
@@ -41,4 +42,4 @@ public:
 
 }  // namespace doe::utils
 
-#endif  // DOE_ENGINE_UTILS_IO_PARSER_H_
+#endif  // DOE_ENGINE_UTILS_JSON_PARSER_H_

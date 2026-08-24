@@ -233,3 +233,10 @@ build\doe_engine.exe build\tests\fixtures\delimited_text_experiment\experiment.j
 每次运行还会在 `{run_dir}`（即 `runs/<run_id>/`）下生成 `engine.log`，逐行带时间戳、rank 号与级别（INFO/WARN/ERROR），包含每个设计点的进度（`design point i/N: ok|failed`）、失败原因、以及结束时的总耗时。MPI 多进程会带各自的 rank 前缀。超算上可用 `tail -f runs/<run_id>/engine.log` 实时查看进度，`grep -i error` 查看错误。
 
 断点续算：`doe_engine <experiment.json> --resume <run_id>` 会复用该 `run_id`，跳过数据库中已完成（SUCCESS/FAILED）的设计点，只补跑剩余的点；若当前配置与数据库中该 run 记录的 `config_hash` 不一致则拒绝续算。
+
+### 3.3 配置文件说明
+
+各配置文件的完整字段、取值与校验规则见 `doc/configuration/`：
+
+- 运行策略（`engine_cfg.json`）：`doc/configuration/engine_cfg.json.md`
+- 科学定义：`experiment.json`、`variables.json`、`responses.json`、`sampling.json`、`workflow.json`、`extractors.json`、Application 定义、Extractor 定义 → 见 `doc/configuration/` 下对应文档

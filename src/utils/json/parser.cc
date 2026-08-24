@@ -34,6 +34,7 @@ using doe::config::ApplicationInputMode;
 using doe::config::ApplicationOutputConfig;
 using doe::config::ApplicationOutputReferenceConfig;
 using doe::config::ApplicationType;
+using doe::config::ArtifactStrategy;
 using doe::config::ArtifactType;
 using doe::config::ConfigScalar;
 using doe::config::ContinuousDomainConfig;
@@ -42,6 +43,7 @@ using doe::config::DelimitedTextTaggerConfig;
 using doe::config::DiscreteDomainConfig;
 using doe::config::DomainConfig;
 using doe::config::DomainType;
+using doe::config::EngineConfig;
 using doe::config::ExperimentConfig;
 using doe::config::ExtractorDefinitionConfig;
 using doe::config::ExtractorInstanceConfig;
@@ -52,7 +54,12 @@ using doe::config::FactorConfig;
 using doe::config::FileReference;
 using doe::config::DelimitedExtractorTagConfig;
 using doe::config::DelimitedTextExtractorConfig;
+using doe::config::FileSystemConfig;
+using doe::config::LimitsConfig;
 using doe::config::LoadedExperimentConfig;
+using doe::config::LogLevel;
+using doe::config::LoggingConfig;
+using doe::config::PersistenceConfig;
 using doe::config::PlaceholderTagConfig;
 using doe::config::PlaceholderTextTaggerConfig;
 using doe::config::PythonResultConfig;
@@ -63,6 +70,8 @@ using doe::config::ResponsesConfig;
 using doe::config::ResponseReferenceConfig;
 using doe::config::SamplingConfig;
 using doe::config::SamplingType;
+using doe::config::SchedulerConfig;
+using doe::config::SchedulerMode;
 using doe::config::TaggerConfig;
 using doe::config::ValueFormatConfig;
 using doe::config::ValueNotation;
@@ -72,6 +81,7 @@ using doe::config::VariablesConfig;
 using doe::config::WorkflowConfig;
 using doe::config::WorkflowConnectionConfig;
 using doe::config::WorkflowEndpointConfig;
+using doe::config::WorkingDirectoryMode;
 using doe::log::ConfigError;
 
 void RequireAbsolutePath(const std::filesystem::path& file)
@@ -176,6 +186,143 @@ std::size_t RequireSize(const nlohmann::json& object,
         throw ConfigError(source, location + "/" + key, "expected a non-negative integer");
     }
     return static_cast<std::size_t>(value);
+}
+
+std::size_t RequirePositiveSize(const nlohmann::json& object, const std::string& key,
+                                const std::filesystem::path& source, const std::string& location)
+{
+    const std::size_t value = RequireSize(object, key, source, location);
+    if (value == 0) {
+        throw ConfigError(source, location + "/" + key, "expected a positive integer");
+    }
+    return value;
+}
+
+ArtifactStrategy ParseArtifactStrategy(const std::string& value,
+                                       const std::filesystem::path& source,
+                                       const std::string& location)
+{
+    if (value == "none") {
+        return ArtifactStrategy::kNone;
+    }
+    if (value == "keep_required") {
+        return ArtifactStrategy::kKeepRequired;
+    }
+    if (value == "keep_all") {
+        return ArtifactStrategy::kKeepAll;
+    }
+    if (value == "tar") {
+        return ArtifactStrategy::kTar;
+    }
+    throw ConfigError(source, location, "unsupported artifact strategy \"" + value + "\"");
+}
+
+WorkingDirectoryMode ParseWorkingDirectoryMode(const std::string& value,
+                                               const std::filesystem::path& source,
+                                               const std::string& location)
+{
+    if (value == "shared") {
+        return WorkingDirectoryMode::kShared;
+    }
+    if (value == "scratch") {
+        return WorkingDirectoryMode::kScratch;
+    }
+    throw ConfigError(source, location, "unsupported working directory \"" + value + "\"");
+}
+
+LogLevel ParseLogLevel(const std::string& value, const std::filesystem::path& source,
+                       const std::string& location)
+{
+    if (value == "info") {
+        return LogLevel::kInfo;
+    }
+    if (value == "warn") {
+        return LogLevel::kWarn;
+    }
+    if (value == "error") {
+        return LogLevel::kError;
+    }
+    throw ConfigError(source, location, "unsupported log level \"" + value + "\"");
+}
+
+SchedulerMode ParseSchedulerMode(const std::string& value,
+                                 const std::filesystem::path& source,
+                                 const std::string& location)
+{
+    if (value == "static") {
+        return SchedulerMode::kStatic;
+    }
+    if (value == "dynamic") {
+        return SchedulerMode::kDynamic;
+    }
+    throw ConfigError(source, location, "unsupported scheduler mode \"" + value + "\"");
+}
+
+PersistenceConfig ParsePersistenceConfig(const nlohmann::json& value,
+                                         const std::filesystem::path& source,
+                                         const std::string& location)
+{
+    const nlohmann::json& object = RequireObject(value, source, location);
+    PersistenceConfig config;
+    config.db_path = std::filesystem::path(RequireString(object, "db_path", source, location));
+    config.batch_size = RequirePositiveSize(object, "batch_size", source, location);
+    config.artifact_strategy = ParseArtifactStrategy(
+        RequireString(object, "artifact_strategy", source, location), source,
+        location + "/artifact_strategy");
+    config.tar_batch_size = RequirePositiveSize(object, "tar_batch_size", source, location);
+    return config;
+}
+
+FileSystemConfig ParseFileSystemConfig(const nlohmann::json& value,
+                                       const std::filesystem::path& source,
+                                       const std::string& location)
+{
+    const nlohmann::json& object = RequireObject(value, source, location);
+    FileSystemConfig config;
+    config.working_directory = ParseWorkingDirectoryMode(
+        RequireString(object, "working_directory", source, location), source,
+        location + "/working_directory");
+    config.scratch_dir = std::filesystem::path(
+        RequireString(object, "scratch_dir", source, location));
+    if (config.working_directory == WorkingDirectoryMode::kScratch && config.scratch_dir.empty()) {
+        throw ConfigError(source, location + "/scratch_dir",
+                          "scratch_dir is required when working_directory is \"scratch\"");
+    }
+    return config;
+}
+
+LoggingConfig ParseLoggingConfig(const nlohmann::json& value,
+                                 const std::filesystem::path& source,
+                                 const std::string& location)
+{
+    const nlohmann::json& object = RequireObject(value, source, location);
+    LoggingConfig config;
+    config.level = ParseLogLevel(RequireString(object, "level", source, location), source,
+                                 location + "/level");
+    config.to_stdout = RequireBoolean(object, "to_stdout", source, location);
+    config.file = RequireString(object, "file", source, location);
+    return config;
+}
+
+SchedulerConfig ParseSchedulerConfig(const nlohmann::json& value,
+                                     const std::filesystem::path& source,
+                                     const std::string& location)
+{
+    const nlohmann::json& object = RequireObject(value, source, location);
+    SchedulerConfig config;
+    config.mode = ParseSchedulerMode(RequireString(object, "mode", source, location), source,
+                                     location + "/mode");
+    config.chunk_size = RequireSize(object, "chunk_size", source, location);
+    return config;
+}
+
+LimitsConfig ParseLimitsConfig(const nlohmann::json& value, const std::filesystem::path& source,
+                               const std::string& location)
+{
+    const nlohmann::json& object = RequireObject(value, source, location);
+    LimitsConfig config;
+    config.max_design_points = RequireSize(object, "max_design_points", source, location);
+    return config;
 }
 
 double RequireDouble(const nlohmann::json& object,
@@ -941,6 +1088,27 @@ std::string ComputeConfigHash(const LoadedExperimentConfig& loaded)
         data += buffer.str();
     }
     return Sha256Hex(data);
+}
+
+EngineConfig Parser::ParseEngineConfig(const std::filesystem::path& file)
+{
+    nlohmann::json root = LoadJson(file);
+    const std::filesystem::path source = file;
+    RequireObject(root, source, "");
+
+    EngineConfig config;
+    config.persistence =
+        ParsePersistenceConfig(RequireMember(root, "persistence", source, ""), source,
+                               "/persistence");
+    config.filesystem =
+        ParseFileSystemConfig(RequireMember(root, "filesystem", source, ""), source,
+                              "/filesystem");
+    config.logging =
+        ParseLoggingConfig(RequireMember(root, "logging", source, ""), source, "/logging");
+    config.scheduler =
+        ParseSchedulerConfig(RequireMember(root, "scheduler", source, ""), source, "/scheduler");
+    config.limits = ParseLimitsConfig(RequireMember(root, "limits", source, ""), source, "/limits");
+    return config;
 }
 
 LoadedExperimentConfig Parser::LoadExperiment(const std::filesystem::path& experiment_file)

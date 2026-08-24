@@ -16,6 +16,7 @@
 
 #include "application_config.h"
 #include "config_types.h"
+#include "engine_config.h"
 #include "experiment_config.h"
 #include "extractor_config.h"
 #include "responses_config.h"
